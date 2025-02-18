@@ -1,22 +1,23 @@
 <?php
 class User {
-    private $pdo;
-    
-    public function __construct($pdo) {
-        $this->pdo = $pdo;
-    }
- 
-    public function create($name, $email, $password) {
-        $stmt = $this->pdo->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        return $stmt->execute([$name, $email, $hashedPassword]);
-    }
-    
+    public $id;
+    public $name;
+    public $email;
+    public $password;
 
-    public function getByEmail($email) {
-        $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = ?");
+    public static function create($name, $email, $password) {
+        global $pdo;
+        $passwordHash = password_hash($password, PASSWORD_BCRYPT);
+        echo "Nom: $name, Email: $email, Password: $passwordHash"; // Débug
+        $stmt = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
+        $stmt->execute([$name, $email, $passwordHash]);
+    }
+
+    public static function findByEmail($email) {
+        global $pdo;
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->execute([$email]);
-        return $stmt->fetch();
+        return $stmt->fetch(PDO::FETCH_OBJ);
     }
 }
 ?>

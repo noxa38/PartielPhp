@@ -1,19 +1,15 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Connexion</title>
+    <title>Login</title>
 </head>
 <body>
-  <h1>Connexion</h1>
-  <?php if (isset($error)) : ?>
-      <p style="color:red;"><?= htmlspecialchars($error) ?></p>
-  <?php endif; ?>
-  <form action="/?action=doLogin" method="post">
-    <label>Email : <input type="email" name="email" required></label><br>
-    <label>Mot de passe : <input type="password" name="password" required></label><br>
-    <button type="submit">Se connecter</button>
-  </form>
- 
+    <h1>Connexion</h1>
+    <form method="POST" action="../Controllers/UserController.php">
+        Email: <input type="email" name="email" required><br>
+        Password: <input type="password" name="password" required><br>
+        <button type="submit">Login</button>
+    </form>
+    <a href="register.php">Créé un compte</a>
 </body>
 </html>
