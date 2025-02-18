@@ -1,59 +1,48 @@
 <?php
-// Configuration de la base de données
-$host    = 'localhost';
-$dbname  = 'projetphp';  // Remplace par le nom de ta base de données
-$username = 'root';         // Remplace par ton identifiant MySQL
-$password = '';             // Remplace par ton mot de passe MySQL
-$charset  = 'utf8mb4';
 
-// DSN (Data Source Name)
-$dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
+spl_autoload_register(function ($class) {
+    $paths = [
+        __DIR__ . '/../app/Controllers/' . $class . '.php',
+        __DIR__ . '/../app/Models/' . $class . '.php'
+    ];
+    foreach ($paths as $path) {
+        if (file_exists($path)) {
+            require_once $path;
+            return;
+        }
+    }
+});
 
-// Options pour PDO
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // Affiche les erreurs
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,
-];
+// Récupérer le paramètre d'action depuis l'URL
+$action = $_GET['action'] ?? '';
+$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri    = rtrim($uri, '/');
 
-try {
-    // Création d'une instance PDO pour se connecter à la base
-    $pdo = new PDO($dsn, $username, $password, $options);
-    echo "Connexion à la base de données réussie.<br>";
-} catch (PDOException $e) {
-    die("Erreur de connexion : " . $e->getMessage());
-}
-
-// Création de la table "users"
-$createUsersTable = "
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=INNODB;
-";
-
-// Création de la table "tasks"
-$createTasksTable = "
-CREATE TABLE IF NOT EXISTS tasks (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    status ENUM('À faire', 'En cours', 'Terminé') DEFAULT 'À faire',
-    user_id INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=INNODB;
-";
-
-try {
+// Définir les routes de base
+switch ($uri) {
+    case '':
+    case '/':
+    case '/login':
+        $controller = new UserController();
+        if ($action === 'doLogin') {
+            $controller->doLogin();
+        } else {
+            $controller->login();
+        }
+        break;
+        
    
-    $pdo->exec($createUsersTable);
-    $pdo->exec($createTasksTable);
-    echo "Tables 'users' et 'tasks' créées avec succès.";
-} catch (PDOException $e) {
-    die("Erreur lors de la création des tables : " . $e->getMessage());
+        
+  
+        
+    case '/logout':
+        $controller = new UserController();
+        $controller->logout();
+        break;
+        
+    default:
+        http_response_code(404);
+        echo "Page non trouvée";
+        break;
 }
 ?>
